@@ -3,6 +3,7 @@ const app = express()
 const mustacheExpress = require("mustache-express")
 const bodyParser = require("body-parser")
 const path = require("path")
+const shortid = require('shortid')
 
 app.engine('mustache', mustacheExpress());
 app.use(express.static(path.join(__dirname, 'static')))
@@ -12,34 +13,41 @@ app.set('views', './views');
 app.set('view engine', 'mustache');
 
 app.get("/", function (req, res, next) {
-  res.render('index', { todos: todos });
+  res.render('index', { 
+  	todos: todos, 
+  	todone: todone
+  });
 });
 
-let todos = ["Clean up living room", "clean garage", "eat cheese"]
-let donetodos = ["Mow Lawn", "Shave cat"]
-
-
-console.log(donetodos)
-
-
+let todos = []
+let todone = []
 
 app.post("/", function (req, res, next) {
-  //I need to parse the array each time and add it back to a list.
 
+  todos.push({
+  	name: req.body.todo,
+  	id: shortid.generate()
+  })
 
-
-  //When an item is clicked "Mark complete", move that item to the complete list possibly use an event listener.
-
-
-
-  todos.push(req.body.todo)
   res.redirect("/");
 
 })
 
+app.post("/complete", function(req,res,next){
+	const id = req.body.id
 
+	const todo = todos.find(function(item){
+		return item.id === id
+	})
 
+	todone.push(todo)
 
+	todos = todos.filter(function(item){
+		return item.id !== id
+	})
+
+	res.redirect("/")
+})
 
 app.listen(3000, function(){
   console.log("App running on port 3000")
@@ -47,9 +55,7 @@ app.listen(3000, function(){
 
 
 
-function itemRemove(item){
-	
-}
+
 
 
 
